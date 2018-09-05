@@ -1,0 +1,163 @@
+import java.util.*;
+import java.io.*;
+public class FrequencyAnalysis {
+ 
+    public static void main(String[] args) 
+    {
+        FrequencyAnalysis freq = new FrequencyAnalysis();
+        ArrayList<String> text = new ArrayList<String>(); //Arraylist of for all 3 parts cleared after cipher is read, interpreted, and printed.
+        int[] singlef = new int[26]; //Array of frequencies for all characters that appear in the cipher in this PSO Max possible length: 26
+        //I could find the number of unique characters in the cipher then make an array of that size 
+        //however since the number of accepted characters is so small I do not feel it is necessary
+        int[] bigramf; //Array of frequencies for all bigrams that appear in the cipher in this PSO Max possible length: 26^2
+        int[] trigramf; //Array of frequencies for all trigrams that appear in the cipher in this PSO Max possible length: 26^3
+        //initialized after number of unique characters determined via the size method.
+        String c;
+        int index;
+        String ciphertext = "";
+        String exitC;
+
+        //read input from stdin -1 to escape
+        System.out.println("Type: -1 on its own line when you are finished");
+        Scanner sc = new Scanner(System.in);
+        while (sc.hasNextLine())
+        {
+            exitC = sc.nextLine();
+            if(exitC.equals("-1"))
+               break;
+            else
+                ciphertext = ciphertext.concat(exitC);
+        }
+   
+        
+        //Remove all characters not in the range of A-Z (capital only) and uppercase all lowercase letters.
+        ciphertext = ciphertext.toUpperCase();
+        ciphertext = ciphertext.replaceAll("[^A-Z]","");
+        
+        System.out.println(ciphertext);
+
+       //loop through for single letters
+       for(int i = 0; i < ciphertext.length(); i++) 
+        {
+            c = ciphertext.substring(i,i+1);
+            if (text.contains(c)) 
+            {
+              //find index and add 1 to singlef
+                index = text.indexOf(c);
+                singlef[index]++;
+            } 
+            else 
+            {
+                //if it is new add it the list
+                text.add(c);
+                index = text.indexOf(c);
+                singlef[index]++;
+            //find index and set frequency to 1 in singlef
+            }
+       }
+       
+       //Order data into highest frequency first and then prints
+       freq.interpret(text, singlef, text.size(), 1);
+        
+       //initialize bigram and trigram frequency arrays with max possible numbers of each (accounts for gibberish messages).
+       bigramf = new int[(int) Math.pow(text.size(), 2)];
+       trigramf = new int[(int) Math.pow(text.size(), 3)];       
+       text.clear();
+    
+        //loop through for bigrams
+        for (int i = 0; i < ciphertext.length() - 1; i++) 
+        {
+            c = ciphertext.substring(i,i+2);
+            if (text.contains(c)) 
+            {
+                //find index and add 1 to bigramf
+                index = text.indexOf(c);
+                bigramf[index]++;
+            } 
+            else 
+            {
+                //if it is new add it the list
+                text.add(c);
+                index = text.indexOf(c);
+                bigramf[index]++;
+                //find index and set frequency to 1 in bigramf
+           }
+        }
+        
+        //Orders second set of data and prints
+        freq.interpret(text, bigramf, text.size(), 2);
+        text.clear();
+       
+        //loop through for trigrams
+        for (int i = 0; i < ciphertext.length() - 2; i++) 
+        {
+            c = ciphertext.substring(i,i+3);
+            if (text.contains(c)) 
+            {
+                //find index and add 1 to trigramf
+                index = text.indexOf(c);
+                trigramf[index]++;
+            } 
+            else 
+            {
+                 //if it is new add it the list
+                text.add(c);
+                index = text.indexOf(c);
+                trigramf[index]++;
+                //find index and set frequency to 1 in trigramf
+           }
+        }
+
+       //Orders the final set of data and prints
+       freq.interpret(text, trigramf, text.size(), 3);
+        
+       return;
+     
+    }
+    
+    //method for sorting and printing the cipher data.
+    public void interpret(ArrayList<String> array, int[] freq, int length, int type) 
+    {
+        //sort the integers and arraylist at the same time via bubble sort
+        int temp;
+        String temp2;
+        boolean swapped;
+        for (int i = 0; i < length - 1; i++)
+        {
+            swapped = false;
+            for (int j = 0; j < length-i-1; j++)
+            {
+                if (freq[j] < freq[j+1])
+                {
+                    temp = freq[j];
+                    temp2 = array.get(j);
+                    freq[j] = freq[j+1];
+                    array.set(j, array.get(j+1));
+                    freq[j+1] = temp;
+                    array.set(j+1, temp2);
+                    swapped = true;
+                }
+            }
+            //if no swap break
+            if (swapped == false)
+                break;
+        }
+       //Print data of the cipher 
+       //formatting output.
+       if (type == 1)
+           System.out.println("Frequency of unique characters appearing in the cipher:");
+       else if (type == 2)
+            System.out.println("Frequency of unique bigrams appearing in the cipher:");
+       else 
+            System.out.println("Frequency of unique trigrams appearing in the cipher:");
+       for (int k = 0; k < array.size(); k++) 
+        {
+          if (k == array.size() - 1)
+              System.out.print("{" + array.get(k) + ": " + freq[k] + "}");
+          else
+              System.out.print("{" + array.get(k) + ": " + freq[k] + "}, ");
+       }
+       System.out.println("\n");
+    return;
+    }
+}
